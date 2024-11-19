@@ -1,0 +1,44 @@
+# getting only the large chromsoomes of the reference:
+
+>OX030881.1 Anopheles cruzii genome assembly, chromosome: X
+>OX030879.1 Anopheles cruzii genome assembly, chromosome: 2
+>OX030880.1 Anopheles cruzii genome assembly, chromosome: 3
+
+cd /draft5/kamila/blastn_genoma_sanger/
+echo -e "OX030881.1\nOX030879.1\nOX030880.1" | seqtk subseq GCA_943734635.1_idAnoCruzAS_RS32_06_genomic.fna -   > ref_AnoCruz_3chrom.fasta
+
+
+cd /draft11/nanopore/boc1m/hifiasm/
+# whole ref genome (dirty graph)
+mummerplot5.sh   -r /draft5/kamila/blastn_genoma_sanger/GCA_943734635.1_idAnoCruzAS_RS32_06_genomic.fna  -e fasta -t 100  -n boc1m_herro_hifiasm1_p    boc1m_herro_hifiasm1_p
+mummerplot5.sh   -r /draft5/kamila/blastn_genoma_sanger/GCA_943734635.1_idAnoCruzAS_RS32_06_genomic.fna  -e fasta -t 100  -n boc1m_herro_hifiasm1_a    boc1m_herro_hifiasm1_a
+# only large chrom X, 2, 3 (much cleaner)
+mummerplot5.sh   -r /draft5/kamila/blastn_genoma_sanger/ref_AnoCruz_3chrom.fasta  -e fasta -t 100  -n boc1m_herro_hifiasm1_p_3chrom    boc1m_herro_hifiasm1_p
+mummerplot5.sh   -r /draft5/kamila/blastn_genoma_sanger/ref_AnoCruz_3chrom.fasta  -e fasta -t 100  -n boc1m_herro_hifiasm1_a_3chrom    boc1m_herro_hifiasm1_a
+
+# trying the new mummerplot6.sh , which allows control of the nucmer stringency through -l and -c (my current defaults are very stringent: l 100 -c 1000
+ -l, --minmatch=uint32                    Set the minimum length of a single exact match (20)
+ -c, --mincluster=uint32                  Sets the minimum length of a cluster of matches (65)
+
+mummerplot6.sh  -N "-l 100 -c 1000" -r /draft5/kamila/blastn_genoma_sanger/ref_AnoCruz_3chrom.fasta  -e fasta -t 100  -n teste_l100c1000    boc1m_herro_hifiasm1_p
+mummerplot6.sh  -N "-l 50 -c 500" -r /draft5/kamila/blastn_genoma_sanger/ref_AnoCruz_3chrom.fasta  -e fasta -t 100  -n teste_l50c500    boc1m_herro_hifiasm1_p
+mummerplot6.sh  -N "-l 30 -c 250" -r /draft5/kamila/blastn_genoma_sanger/ref_AnoCruz_3chrom.fasta  -e fasta -t 100  -n teste_l30c250    boc1m_herro_hifiasm1_p
+mummerplot6.sh  -N "-l 20 -c 65" -r /draft5/kamila/blastn_genoma_sanger/ref_AnoCruz_3chrom.fasta  -e fasta -t 100  -n teste_l20c65    boc1m_herro_hifiasm1_p
+
+
+getting the large contig that shows the inversion between boc1m and the reference genome
+I saw in the mummeplot that the contigs are
+ptg000054l (boc1m)
+OX030879.1 (reference strain)  
+
+cd /draft11/nanopore/boc1m/chrom3_inversion
+echo "OX030879.1"  |  seqtk subseq /draft5/kamila/blastn_genoma_sanger/ref_AnoCruz_3chrom.fasta - > chrom3_refgenome.fasta
+echo "ptg000054l"  |  seqtk subseq /draft11/nanopore/boc1m/hifiasm/boc1m_herro_hifiasm1_p.fasta    - > ptg000054l_boc1m.fasta
+
+
+echo "OX030880.1"  |  seqtk subseq ref_AnoCruz_3chrom.fasta - > chrom3_refgenome.fasta
+echo "OX030879.1"  |  seqtk subseq ref_AnoCruz_3chrom.fasta - > chrom2_refgenome.fasta
+echo "ptg000021l" | seqtk subseq  boc1m_herro_hifiasm1_p.fasta - >  ptg000021l_boc1m.fasta
+
+
+#run in D-genies online :  https://dgenies.toulouse.inra.fr/run
