@@ -1,0 +1,161 @@
+################################### now aligning with translatorX ################################################
+
+cd work directory/57_at_least_30
+nohup awk '(1==1){file="work directory/multifasta/b146_b56_bo8_c40_cdop_gu_itF_itM_ml8_ml11_ressl_uc137_b160_b104_b140_b66_b85_b86_bo2_ml21_ml121_uc1011_uc75_uc62_Pou1n_V1_V3_c1_c11_c14_c25_c31_c33_c34_c36_G2_belS_crS_ucNan_bNan_BO3_IG2_CJ7_CJ6_CJ4_CJ9_IG5_P1_P2_P3_P4_P5_S1_S2_S3_b7f_b1m_" $1 ".fna" ;   system("perl ../translatorx_vLocal.pl -g 1 -t F -i " file " -o " $1".trx ")}'  work directory/57_at_least_30/40atleast20speciesCV10.gene_name > nohup_trx.out &  
+
+
+#will generate the files trx.nt_cleanali.fasta
+
+###############################Single gene ML tree inference######################################## para inferir uma arvore para cada gene
+
+### I created a list file to be able to run the autoiqtree
+ls *at7147.trx.nt_cleanali.fasta > list #2051 list
+
+
+cd work directory/57_at_least_30
+mv *nt_cleanali.fasta cleanali.fasta/
+mkdir cleanali.fasta
+
+cp -p work directory/57_at_least_30/*cleanali.fasta work directory/57_at_least_30/cleanali.fasta
+
+nohup perl AutoIQTree.pl & #
+
+#########################################################################TreeShrink###########################################################################
+
+mkdir work directory/TreeShrink/
+
+mkdir work directory/TreeShrink/Input_dir_57_at_least_30
+
+nohup nice -10 perl makedirectories.pl &
+
+nohup nice -10 perl copydirectories.pl & 
+
+nohup nice -10 perl correctname.pl & 
+
+nohup nice -10 python work directory/run_treeshrink.py -i work directory/TreeShrink/Input_dir_57_at_least_30 -t tree_file -a cleanali_file -o /draft5/kamila/Fil36genomas_at_least_3_per_spp/TreeShrink/Input_dir_57_at_least_30 &
+#317795
+
+cd work directory/TreeShrink/TreeShrink
+mv nohup.out nohup_TreeShrink.out
+
+
+nohup perl change_align_names.pl & #320904
+
+######################## ASTRAL (MSC)################################################## 
+#Multispecies coalescent method for species tree inference
+
+cat *at7147*/*output.nwk > list_treefile
+
+nohup java -jar /home/tools/Astral/astral.5.7.3.jar -i  list_treefile.nwk &
+ 
+
+########################IQ-TREE (ML)#####################################################################
+
+ls *at7147*/*cleanali_file_shrunk0.05 > list_57_alin_shrunk0.05 
+
+nohup perl Concat_MissingData.pl & 
+
+I had to create a nexus file with partition information. I used Concat.info and edited it in notepad++ in order to create a nexus file (Concat57genAtleast.nex)
+
+nohup /home6/tools/iqtree-1.6.12-Linux/bin/iqtree -s Concat.fas -spp Concat_57gen.nex -m MFP -b 1000 -alrt 1000 -nt 180 &
+
+
+
+
+
+
+
+
+
+
+
+
+
+#@###########################################################################@#########@#########@#########@#########@#########@#########@#########@#########@##########@
+#@################@      # selecting the orthologs present in at least 50 samples and with lenght of coefficient of variation < 10%  #################@###################@
+#@###########################################################################@#########@#########@#########@#########@#########@##########@#########@#########@#########@
+
+
+ #now selecting the orthologs present in at least 50 samples and with lenght of coefficient of variation < 10%
+ 
+ 
+cd   /draft5/kamila/Fil57genomas/multifasta
+ortholog_count_file="b146_b56_bo8_c40_cdop_gu_itF_itM_ml8_ml11_ressl_uc137_b160_b104_b140_b66_b85_b86_bo2_ml21_ml121_uc1011_uc75_uc62_Pou1n_V1_V3_c1_c11_c14_c25_c31_c33_c34_c36_G2_belS_crS_ucNan_bNan_BO3_IG2_CJ7_CJ6_CJ4_CJ9_IG5_P1_P2_P3_P4_P5_S1_S2_S3_b7f_b1m_.ortholog_counts"
+awk '(($2 >=50)&&($3<=10)){print $0}'  $ortholog_count_file | sort -k3,3n  > 50atleast57speciesCV10.ortholog_counts 
+
+
+wc -l *.ortholog_counts
+  
+# 1362 50atleast57speciesCV10.ortholog_counts
+
+
+cd /draft5/kamila/Fil57genomas/multifasta	
+mkdir /draft5/kamila/Fil57genomas/57_at_least_50/
+
+awk '(1==1){print $1}' 50atleast57speciesCV10.ortholog_counts  > /draft5/kamila/Fil57genomas/57_at_least_50/50atleast57speciesCV10.gene_name 
+cd /draft5/kamila/Fil57genomas/57_at_least_50/
+ 
+wc -l 50atleast57speciesCV10.gene_name
+
+
+
+################################### now aligning with translatorX ################################################
+
+cd work directory/57_at_least_50
+nohup awk '(1==1){file="work directory/multifasta/b146_b56_bo8_c40_cdop_gu_itF_itM_ml8_ml11_ressl_uc137_b160_b104_b140_b66_b85_b86_bo2_ml21_ml121_uc1011_uc75_uc62_Pou1n_V1_V3_c1_c11_c14_c25_c31_c33_c34_c36_G2_belS_crS_ucNan_bNan_BO3_IG2_CJ7_CJ6_CJ4_CJ9_IG5_P1_P2_P3_P4_P5_S1_S2_S3_b7f_b1m_" $1 ".fna" ;   system("perl ../translatorx_vLocal.pl -g 1 -t F -i " file " -o " $1".trx ")}'  work directory/57_at_least_50/40atleast20speciesCV10.gene_name > nohup_trx.out &  
+
+
+#will generate the files trx.nt_cleanali.fasta
+
+###############################Single gene ML tree inference######################################## para inferir uma arvore para cada gene
+
+### I created a list file to be able to run the autoiqtree
+ls *at7147.trx.nt_cleanali.fasta > list #2051 list
+
+
+cd work directory/57_at_least_50
+mv *nt_cleanali.fasta cleanali.fasta/
+mkdir cleanali.fasta
+
+cp -p work directory/57_at_least_50/*cleanali.fasta work directory/57_at_least_50/cleanali.fasta
+
+nohup perl AutoIQTree.pl & #
+
+#########################################################################TreeShrink###########################################################################
+
+mkdir work directory/TreeShrink/
+
+mkdir work directory/TreeShrink/Input_dir_57_at_least_50
+
+nohup nice -10 perl makedirectories.pl &
+
+nohup nice -10 perl copydirectories.pl & 
+
+nohup nice -10 perl correctname.pl & 
+
+nohup nice -10 python work directory/run_treeshrink.py -i work directory/TreeShrink/Input_dir_57_at_least_50 -t tree_file -a cleanali_file -o /draft5/kamila/Fil36genomas_at_least_3_per_spp/TreeShrink/Input_dir_57_at_least_50 &
+#317795
+
+cd work directory/TreeShrink/TreeShrink
+mv nohup.out nohup_TreeShrink.out
+
+
+nohup perl change_align_names.pl & #320904
+
+######################## ASTRAL (MSC)################################################## 
+#Multispecies coalescent method for species tree inference
+
+cat *at7147*/*output.nwk > list_treefile
+
+nohup java -jar /home/tools/Astral/astral.5.7.3.jar -i  list_treefile.nwk &
+ 
+
+########################IQ-TREE (ML)#####################################################################
+
+ls *at7147*/*cleanali_file_shrunk0.05 > list_57_alin_shrunk0.05 
+
+nohup perl Concat_MissingData.pl & 
+
+I had to create a nexus file with partition information. I used Concat.info and edited it in notepad++ in order to create a nexus file (Concat57genAtleast.nex)
+
+nohup /home6/tools/iqtree-1.6.12-Linux/bin/iqtree -s Concat.fas -spp Concat_57gen.nex -m MFP -b 1000 -alrt 1000 -nt 180 &
