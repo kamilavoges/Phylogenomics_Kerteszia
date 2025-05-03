@@ -1,62 +1,185 @@
-################################### aligning with translatorX ################################################
+#@###########################################################################@#########@#########@#########@#########@#########@#########@#########@#########@#########@
+#@###########################################################################@      Creating BUSCO dataset       #########@####################@#######################@
+#@###########################################################################@#########@#########@#########@#########@#########@#########@#########@#########@#########@
+mkdir /draft5/kamila/Fil59genomas
+cd /draft5/kamila/Fil59genomas
 
-cd work directory/57_at_least_30
-nohup awk '(1==1){file="work directory/multifasta/b146_b56_bo8_c40_cdp_gu_itF_itM_ml8_ml11_res_u137_b160_b104_b140_b66_b85_b86_bo2_ml21_ml121_u1011_u75_u62_Pou1_V1_V3_c1_c11_c14_c25_c31_c33_c34_c36_G2_uNan_bNan_BO3_IG2_CJ7_CJ6_CJ4_CJ9_IG5_P1_P2_P3_P4_P5_S1_S2_S3_b7f_b1m_sb1_sc1_sc2_sc3_" $1 ".fna" ;   system("perl ../translatorx_vLocal.pl -g 1 -t F -i " file " -o " $1".trx ")}'  work directory/59_at_least_30/59atleast30speciesCV9.gene_name > nohup_trx.out &  
+for species in  b146 b56 bo8 c40 cdp gu itF itM ml8 ml11 res u137 b160 b104 b140 b66 b85 b86 bo2 ml21 ml121 u1011 u75 u62 Pou1 V1 V3 c1 c11 c14 c25 c31 c33 c34 c36 G2 uNan bNan BO3 IG2 CJ7 CJ6 CJ4 CJ9 IG5 P1 P2 P3 P4 P5 S1 S2 S3 b7f b1m sb1 sc1 sc2 sc3 
+  
 
-#will generate the files trx.nt_ali.fasta
+do 
+  mkdir $species
+  done
 
-###############################Single gene ML tree inference######################################## 
 
-### I created a list file to be able to run the autoiqtree
+#Since the busco_output files for each species are in distinct directories, I will copy them manually, one by one
+cp -p work directory/b146/run_diptera_odb10/busco_sequences/single_copy_busco_sequences/*.f*a /draft5/kamila/Fil59genomas/
+###I did this for each sample.
+
+#@###########################################################################@#########@#########@#########@#########@#########@#########@#########@#########@#########@
+#@###########################################################################@      Correcting the reading frame of all CDS to +1      ############@###################@
+#@###########################################################################@#########@#########@#########@#########@#########@#########@#########@#########@#########@
+
+#BUSCO will retrive fna and faa files
+#Correcting the reading frame of all CDS to +1
+
+  cd /draft5/kamila/Fil59genomas/
+  
+for species in  b146 b56 bo8 c40 cdp gu itF itM ml8 ml11 res u137 b160 b104 b140 b66 b85 b86 bo2 ml21 ml121 u1011 u75 u62 Pou1 V1 V3 c1 c11 c14 c25 c31 c33 c34 c36 G2 uNan bNan BO3 IG2 CJ7 CJ6 CJ4 CJ9 IG5 P1 P2 P3 P4 P5 S1 S2 S3 b7f b1m sb1 sc1 sc2 sc3  
+ do 
+    cd /draft5/kamila/Fil59genomas/$species
+    echo -en $species "\t"
+    /draft5/kamila/Fil59genomas/fix_busco_CDS_frame.awk   verbose=1 mode=fix  /draft5/kamila/Fil59genomas/diptera_odb10.gene_name
+    echo ""
+ done
+ 
+ # checking if all CDS got frame +1
+ 
+   cd /draft5/kamila/Fil59genomas/
+ 
+for species in  b146 b56 bo8 c40 cdp gu itF itM ml8 ml11 res u137 b160 b104 b140 b66 b85 b86 bo2 ml21 ml121 u1011 u75 u62 Pou1 V1 V3 c1 c11 c14 c25 c31 c33 c34 c36 G2 uNan bNan BO3 IG2 CJ7 CJ6 CJ4 CJ9 IG5 P1 P2 P3 P4 P5 S1 S2 S3 b7f b1m sb1 sc1 sc2 sc3  
+ do 
+    cd /draft5/kamila/Fil59genomas/$species
+    echo -en $species "\t"
+    /draft5/kamila/Fil59genomas/fix_busco_CDS_frame.awk   verbose=1 mode=detect  /draft5/kamila/Fil59genomas/diptera_odb10.gene_name
+    echo ""
+ done
+ 
+ 
+#@###########################################################################@#########@#########@#########@#########@#########@#########@#########@#########@##########@
+#@###########################################################################@      # now making one multifasta for each gene      #################@###################@
+#@###########################################################################@#########@#########@#########@#########@#########@##########@#########@#########@#########@
+  
+mkdir /draft5/kamila/Fil59genomas/multifasta
+
+ 
+cd /draft5/kamila/Fil59genomas/
+/home6/tools/Solexa/scripts/awk_backup/busco2multifasta.awk   out_dir="/draft5/kamila/Fil59genomas/multifasta"   species="b146 b56 bo8 c40 cdp gu itF itM ml8 ml11 res u137 b160 b104 b140 b66 b85 b86 bo2 ml21 ml121 u1011 u75 u62 Pou1 V1 V3 c1 c11 c14 c25 c31 c33 c34 c36 G2 uNan bNan BO3 IG2 CJ7 CJ6 CJ4 CJ9 IG5 P1 P2 P3 P4 P5 S1 S2 S3 b7f b1m sb1 sc1 sc2 sc3"   /draft5/kamila/Fil59genomas/diptera_odb10.gene_name
+
+
+#@###########################################################################@#########@#########@#########@#########@#########@#########@#########@#########@##########@
+#@################@      # selecting the orthologs present in at least 30 and with lenght of coefficient of variation < 9%      #################@###################@
+#@###########################################################################@#########@#########@#########@#########@#########@##########@#########@#########@#########@
+
+
+ cd   /draft5/kamila/Fil59genomas/multifasta
+ ortholog_count_file="b146_b56_bo8_c40_cdp_gu_itF_itM_ml8_ml11_res_u137_b160_b104_b140_b66_b85_b86_bo2_ml21_ml121_u1011_u75_u62_Pou1_V1_V3_c1_c11_c14_c25_c31_c33_c34_c36_G2_uNan_bNan_BO3_IG2_CJ7_CJ6_CJ4_CJ9_IG5_P1_P2_P3_P4_P5_S1_S2_S3_b7f_b1m_sb1_sc1_sc2_sc3_.ortholog_counts"
+ awk '(($2 >=30)&&($3<=9)){print $0}'  $ortholog_count_file | sort -k3,3n  > 59atleast30speciesCV9.ortholog_counts 
+
+wc -l *.ortholog_counts #3098 60atleast30speciesCV9.ortholog_counts
+   
+cd /draft5/kamila/Fil59genomas/multifasta	
+mkdir /draft5/kamila/Fil59genomas/59_at_least_30/
+
+awk '(1==1){print $1}' 59atleast30speciesCV9.ortholog_counts > /draft5/kamila/Fil59genomas/59_at_least_30/59atleast30speciesCV9.gene_name  
+ 
+
+################################### now aligning with translatorX ################################################
+
+
+cd /draft5/kamila/Fil59genomas/59_at_least_30
+nohup awk '(1==1){file="/draft5/kamila/Fil59genomas/multifasta/b146_b56_bo8_c40_cdp_gu_itF_itM_ml8_ml11_res_u137_b160_b104_b140_b66_b85_b86_bo2_ml21_ml121_u1011_u75_u62_Pou1_V1_V3_c1_c11_c14_c25_c31_c33_c34_c36_G2_uNan_bNan_BO3_IG2_CJ7_CJ6_CJ4_CJ9_IG5_P1_P2_P3_P4_P5_S1_S2_S3_b7f_b1m_sb1_sc1_sc2_sc3_" $1 ".fna" ;   system("perl translatorx_vLocal.pl -t F -i " file " -o " $1".trx ")}'  /draft5/kamila/Fil59genomas/59_at_least_30/59atleast30speciesCV9.gene_name  > nohup_trx.out &  
+
+ls *.trx.nt_ali.fasta | wc -l  #/draft5/kamila/Fil59genomas/59_at_least_30
+# dos2unix -k nohup_trx.out  #contail all  messages   
+
+
+
+
+# ###############################Single gene ML tree inference######################################## 
+
+
+cd /draft5/kamila/Fil59genomas/59_at_least_30
+mkdir ali.fasta
+
+#!/usr/bin/perl -w
+
+open IN, "list"; # lista com o nome de todos os alinhamentos
+
+while($line = <IN>){
+        chomp($line);
+        push(@files, $line)
+}
+close IN;
+
+foreach my $var(@files){
+        $var =~ s/\.trx\.nt\_ali\.fasta//g;
+        mkdir("$var");
+        chdir("$var");
+        system("mv ../$var.trx.nt_ali.fasta $var.trx.nt_ali.fasta");
+#       system("raxmlHPC -f d -m GTRGAMMA -p 12345 -s $var.trx.nt_ali.fasta -n $var");
+        system("/home6/tools/iqtree-3.0.0-Linux-intel/bin/iqtree3 -s $var.trx.nt_ali.fasta -nt 50 -m MFP");
+        chdir("../");
+}
+
+
 ls *at7147.trx.nt_ali.fasta > list 
+nohup nice -10 perl AutoIQTree.pl &
 
-cd work directory/59_at_least_30
-mv *nt_ali.fasta ali.fasta/
-mkdir cleanali.fasta
 
-cp -p work directory/59_at_least_30/*cleanali.fasta work directory/59_at_least_30/ali.fasta
-
-nohup perl AutoIQTree.pl & #
 
 #########################################################################TreeShrink###########################################################################
 
-mkdir work directory/TreeShrink/
 
-mkdir work directory/TreeShrink/Input_dir_59_at_least_30
+mkdir /draft5/kamila/Fil59genomas/59_at_least_30/TreeShrink/
 
-nohup nice -10 perl makedirectories.pl &
+mkdir /draft5/kamila/Fil59genomas/59_at_least_30/TreeShrink/Input_dir_59_at_least_30
 
-nohup nice -10 perl copydirectories.pl & 
+nohup perl makedirectories.pl &
 
-nohup nice -10 perl correctname.pl & 
+nohup perl copydirectories.pl & 
+
+nohup perl correctname.pl & 
+
 
 nohup python /draft5/kamila/Fil40genomas_com_sanger_at_least35/TreeShrink/Input_dir_40_at_least_35/TreeShrink/run_treeshrink.py -i /draft5/kamila/Fil59genomas/59_at_least_30/TreeShrink/Input_dir_59_at_least_30 -t tree_file -a cleanali_file -o /draft5/kamila/Fil59genomas/59_at_least_30/TreeShrink/Input_dir_59_at_least_30 &
 
 
-cd work directory/TreeShrink/TreeShrink
-mv nohup.out nohup_TreeShrink.out
+cd /draft5/kamila/Fil59genomas/TreeShrink
+
+conda activate kamila_workbench
 
 
-nohup perl change_align_names.pl & #320904
+cp -p /draft5/kamila/Fil50genomas2/TreeShrink/Input_dir_55_at_least_30/change_align_names.pl /draft5/kamila/Fil59genomas/59_at_least_30/TreeShrink/Input_dir_59_at_least_30
+
+
+#isso está abaxio de ## ASTRAL (MSC)#
+nohup perl change_align_names.pl & 
 
 ######################## ASTRAL (MSC)################################################## 
-#Multispecies coalescent method for species tree inference
 
-cat *at7147*/*output.nwk > list_treefile
 
-nohup java -jar /home/tools/Astral/astral.5.7.3.jar -i  list_treefile.nwk &
+cat *at7147*/*output.nwk > list_treefile_59_30.nwk
+
+
+nohup java -jar /home6/tools/Astral/astral.5.7.3.jar -i list_treefile_59_30.nwk & 
  
 
 ########################IQ-TREE (ML)#####################################################################
 
-ls *at7147*/*cleanali_file_shrunk0.05 > list_59_alin_shrunk0.05 
+
+
+ls *at7147*/*cleanali_file_shrunk0.05 > list_59_30_shrunk0.05 
+
 
 nohup perl Concat_MissingData.pl & 
 
-I had to create a nexus file with partition information. I used Concat.info and edited it in notepad++ in order to create a nexus file 
+
+#I had to create a nexus file with partition information. I used Concat.info and edited it in notepad++ in order to create a nexus file 
+# EXAMPLE OF NEXUS PARTITION FILE com os resultados do Concat.info:
+# #nexus
+# begin sets;
+    # charset 3753at7147 = 1700764-1702953;
+	# charset 55301at7147 = 2344006-2344650;
+	# charset 42904at7147 = 1932826-1933704;
+	# charset 34044at7147 = 1529890-1530903;
+	# charset 44737at7147 = 2010205-2011176;
+	# charset 48609at7147 = 2136511-2137212;
+	# charset 51524at7147 = 2235973-2237451;
+	# charset 29906at7147 = 1330666-1332609;
+	# charset 48155at7147 = 2117911-2118621;
+# end;
+
+
 
 nohup /home6/tools/iqtree-3.0.0-Linux-intel/bin/iqtree3 -s Concat.fas -spp Concat_59_30gen.nex -m MFP -B 1000 -nt AUTO > nohup_iqtree.out 2>&1 &
-
-
-
-
